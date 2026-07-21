@@ -1,0 +1,21 @@
+git status# 虚拟环境
+.venv/
+venv/
+
+# 测试报告 / allure 相关
+allure-results/
+allure-report/
+
+# Python 缓存文件
+__pycache__/
+*.pyc
+
+# pytest 缓存
+.pytest_cache/
+
+# IDE 配置文件
+.idea/
+
+
+# 环境变量文件
+.env
