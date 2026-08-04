@@ -1,4 +1,5 @@
 # Restful Booker API Test Suite
+![API Tests](https://github.com/YYQ-Tester/restful-booker-api-tests/actions/workflows/tests.yml/badge.svg)
 
 Automated API tests for https://restful-booker.herokuapp.com
 Built with Python, pytest, and requests.
