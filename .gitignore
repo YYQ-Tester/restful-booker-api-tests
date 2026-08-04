@@ -1,4 +1,6 @@
-git status# 虚拟环境
+git status
+
+# 虚拟环境
 .venv/
 venv/
 

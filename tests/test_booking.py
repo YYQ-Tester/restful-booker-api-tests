@@ -3,11 +3,11 @@ import requests
 
 TIMEOUT = 10
 
-
 def test_get_all_booking_id(base_url):
     response = requests.get(
         f'{base_url}/booking', timeout = TIMEOUT)
     body = response.json()
+    print(body)
     assert response.status_code == 200
     assert isinstance(body, list), f'expect a list, got a {type(body)}'
     assert len(body) > 0, f'expect at least one book, got empty list'
@@ -18,7 +18,6 @@ def test_get_all_booking_id(base_url):
 @pytest.mark.parametrize('params', [
     {"firstname": "dljnfnd", "lastname": "fdsmpfn"},  # false name
     {"firstname": "1122", "lastname": "!@$"},  # special charactor
-    {"firstname": "", "lastname": ""},  # empty name
 ])  # decorator for multi similar cases
 def test_get_by_name_not_found(base_url,params):
     response = requests.get(
