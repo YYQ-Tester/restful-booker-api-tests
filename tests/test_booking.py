@@ -1,11 +1,11 @@
 import pytest
 import requests
 
-TIMEOUT = 10
+TIMEOUT=10
 
-def test_get_all_booking_id(base_url):
-    response = requests.get(
-        f'{base_url}/booking', timeout = TIMEOUT)
+def test_get_all_booking_id(base_url,api_session):
+    response = api_session.get(
+        f'{base_url}/booking')
     body = response.json()
     print(body)
     assert response.status_code == 200

@@ -1,7 +1,10 @@
+from functools import partial
 import pytest
 import requests
 
+
 BASE_URL='https://restful-booker.herokuapp.com'
+TIMEOUT = 10
 
 @pytest.fixture(scope = "session")
 def base_url():
@@ -20,9 +23,36 @@ def auth_token():
     token=response.json()['token']
     return token
 
+# @pytest.fixture
+# def auth_headers(auth_token):
+#     return {"Cookie": f"token={auth_token}"}
+
+#encapsulate headers and timeout
 @pytest.fixture
-def auth_headers(auth_token):
-    return {"Cookie": f"token={auth_token}"}
+def api_session(auth_token):
+    session = requests.session()
+    session.headers.update({"Cookie": f"token={auth_token}"})
+    # add timeout to every request function
+    session.get = partial(session.get,timeout=TIMEOUT)
+    session.put = partial(session.put, timeout = TIMEOUT)
+    session.post = partial(session.post, timeout = TIMEOUT)
+    session.patch = partial(session.patch, timeout = TIMEOUT)
+    session.delete = partial(session.delete, timeout = TIMEOUT)
+    return session
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 @pytest.fixture()
