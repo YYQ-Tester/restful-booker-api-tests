@@ -13,7 +13,7 @@ def base_url():
 @pytest.fixture(scope = "session")
 def auth_token():
     response=requests.post(
-        f'{BASE_URL}/auth',timeout=10,
+        f'{BASE_URL}/auth',timeout=TIMEOUT,
         json={
             "username": "admin",
             "password": "password123"
@@ -30,6 +30,7 @@ def auth_token():
 #encapsulate headers and timeout
 @pytest.fixture
 def api_session(auth_token):
+    # wrap it with headers and timeout
     session = requests.session()
     session.headers.update({"Cookie": f"token={auth_token}"})
     # add timeout to every request function
@@ -40,23 +41,8 @@ def api_session(auth_token):
     session.delete = partial(session.delete, timeout = TIMEOUT)
     return session
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 @pytest.fixture()
-def create_book(auth_token,auth_headers):
+def create_book(api_session):
     new_book={
         "firstname": "James",
         "lastname": "Brown",
@@ -69,7 +55,7 @@ def create_book(auth_token,auth_headers):
         "additionalneeds": "Breakfast"
     }
 
-    response = requests.post(
+    response = api_session.post(
         f'{BASE_URL}/booking',
         json=new_book
     )
@@ -78,8 +64,7 @@ def create_book(auth_token,auth_headers):
     body=response.json()
     booking_id=body['bookingid']
     yield body
-    del_response=requests.delete(
-        f'{BASE_URL}/booking/{booking_id}',
-        headers = auth_headers
+    del_response=api_session.delete(
+        f'{BASE_URL}/booking/{booking_id}'
     )
     assert del_response.status_code==201

@@ -1,6 +1,6 @@
 import requests
 
-def test_Ping_check(base_url):
-    response = requests.get(
+def test_ping_check(base_url,api_session):
+    response = api_session.get(
         f'{base_url}/Ping')
     assert response.status_code == 201

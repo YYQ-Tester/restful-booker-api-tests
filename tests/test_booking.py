@@ -19,11 +19,10 @@ def test_get_all_booking_id(base_url,api_session):
     {"firstname": "dljnfnd", "lastname": "fdsmpfn"},  # false name
     {"firstname": "1122", "lastname": "!@$"},  # special charactor
 ])  # decorator for multi similar cases
-def test_get_by_name_not_found(base_url,params):
-    response = requests.get(
+def test_get_by_name_not_found(base_url,params,api_session):
+    response = api_session.get(
         f'{base_url}/booking',
-        params = params,
-        timeout = TIMEOUT
+        params = params
     )
     body = response.json()
     assert response.status_code == 200
@@ -31,21 +30,20 @@ def test_get_by_name_not_found(base_url,params):
     assert len(body) == 0
 
 
-def test_get_by_check_date(base_url):
-    response = requests.get(
-        f'{base_url}/booking?checkin=2004-03-13&checkout=2014-05-21',
-        timeout = TIMEOUT
+def test_get_by_check_date(base_url,api_session):
+    response = api_session.get(
+        f'{base_url}/booking?checkin=2004-03-13&checkout=2014-05-21'
     )
     body = response.json()
     assert response.status_code == 200
     assert isinstance(body, list)
 
 
-def test_get_by_booking_id(base_url,create_book):
+def test_get_by_booking_id(base_url,create_book,api_session):
     body = create_book
     book_id = body['bookingid']
-    response = requests.get(
-        f'{base_url}/booking/{book_id}', timeout = TIMEOUT)
+    response = api_session.get(
+        f'{base_url}/booking/{book_id}')
     body = response.json()
     assert response.status_code == 200
     assert isinstance(body, dict)
@@ -56,25 +54,25 @@ def test_get_by_booking_id(base_url,create_book):
     assert isinstance(body['depositpaid'], bool)
 
 
-def test_get_by_booking_nonexistence_id(base_url):
-    response = requests.get(
-        f'{base_url}/booking/888888888', timeout = TIMEOUT)
+def test_get_by_booking_nonexistence_id(base_url,api_session):
+    response = api_session.get(
+        f'{base_url}/booking/888888888')
     assert response.status_code == 404
     assert 'Not Found' in response.text
 
 
-def test_create_book(base_url,create_book):
+def test_create_book(base_url,api_session,create_book):
     body = create_book
     booking_id = body['bookingid']
     assert isinstance(body, dict)
 
-    create_response = requests.get(
-        f'{base_url}/booking/{booking_id}', timeout = TIMEOUT
+    create_response = api_session.get(
+        f'{base_url}/booking/{booking_id}'
     )
     assert create_response.json()['firstname'] == 'James'
 
 
-def test_update_book(base_url, auth_headers, create_book):
+def test_update_book(base_url, api_session, create_book):
     body = create_book
     booking_id = body['bookingid']
     update_book = {
@@ -88,35 +86,31 @@ def test_update_book(base_url, auth_headers, create_book):
         },
         "additionalneeds": "Breakfast"
     }
-    response = requests.put(
+    response = api_session.put(
         f'{base_url}/booking/{booking_id}',
-        json = update_book,
-        headers = auth_headers,
-        timeout = TIMEOUT
+        json = update_book
     )
     assert response.status_code == 200
     assert response.json()['firstname'] == 'Jerry'
 
 
-def test_partial_update_book(base_url, auth_headers, create_book):
+def test_partial_update_book(base_url, api_session, create_book):
     body = create_book
     booking_id = body['bookingid']
     update_book = {
         "firstname": "Jenny",
         "lastname": "Pink"
     }
-    response = requests.patch(
+    response = api_session.patch(
         f'{base_url}/booking/{booking_id}',
-        json = update_book,
-        headers = auth_headers,
-        timeout = TIMEOUT
+        json = update_book
     )
     assert response.status_code == 200
     assert response.json()['firstname'] == 'Jenny'
     assert response.json()['lastname'] == 'Pink'
 
 
-def test_delete_book(base_url, auth_headers):
+def test_delete_book(base_url, api_session):
     new_book = {
         "firstname": "James",
         "lastname": "Brown",
@@ -129,23 +123,21 @@ def test_delete_book(base_url, auth_headers):
         "additionalneeds": "Breakfast"
     }
 
-    response = requests.post(
+    response = api_session.post(
         f'{base_url}/booking',
         json = new_book
     )
     assert response.status_code == 200
     booking_id=response.json()['bookingid']
 
-    response = requests.delete(
-        f'{base_url}/booking/{booking_id}',
-        headers = auth_headers
+    response = api_session.delete(
+        f'{base_url}/booking/{booking_id}'
     )
     assert response.status_code == 201
 
     #query after deleting
-    query_response = requests.get(
-        f'{base_url}/booking/{booking_id}',
-        timeout = TIMEOUT
+    query_response = api_session.get(
+        f'{base_url}/booking/{booking_id}'
     )
     assert query_response.status_code == 404
     assert 'Not Found' in query_response.text
