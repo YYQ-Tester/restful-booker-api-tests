@@ -1,4 +1,3 @@
-from jsonschema import validate
 
 BOOKING_SCHEMA = {
     "type": "object",

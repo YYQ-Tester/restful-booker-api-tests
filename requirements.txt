@@ -1,3 +1,4 @@
 pytest
 requests
+jsonschema
 allure-pytest
