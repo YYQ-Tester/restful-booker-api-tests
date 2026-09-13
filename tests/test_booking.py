@@ -1,7 +1,8 @@
 import pytest
-import requests
+from jsonschema import validate
 
-TIMEOUT=10
+from tests.schemas import BOOKING_SCHEMA,BOOK_ID_SCHEMAS
+
 
 def test_get_all_booking_id(base_url,api_session):
     response = api_session.get(
@@ -9,15 +10,18 @@ def test_get_all_booking_id(base_url,api_session):
     body = response.json()
     print(body)
     assert response.status_code == 200
-    assert isinstance(body, list), f'expect a list, got a {type(body)}'
+    #assert isinstance(body, list), f'expect a list, got a {type(body)}'
+    validate(instance = body, schema = BOOK_ID_SCHEMAS)
+
     assert len(body) > 0, f'expect at least one book, got empty list'
-    assert 'bookingid' in body[0], f'expect "bookingid" key, got {body[0]}'
-    assert isinstance(body[0]['bookingid'], int), f"expect bookingid to be integer, got{type(body[0]['bookingid'])}"
+    #assert 'bookingid' in body[0], f'expect "bookingid" key, got {body[0]}'
+    #assert isinstance(body[0]['bookingid'], int), f"expect bookingid to be integer, got{type(body[0]['bookingid'])}"
 
 
 @pytest.mark.parametrize('params', [
     {"firstname": "dljnfnd", "lastname": "fdsmpfn"},  # false name
     {"firstname": "1122", "lastname": "!@$"},  # special charactor
+    {"firstname": " ", "lastname": " "}    # empty name
 ])  # decorator for multi similar cases
 def test_get_by_name_not_found(base_url,params,api_session):
     response = api_session.get(
@@ -26,8 +30,9 @@ def test_get_by_name_not_found(base_url,params,api_session):
     )
     body = response.json()
     assert response.status_code == 200
-    assert isinstance(body, list)
-    assert len(body) == 0
+    #assert isinstance(body, list) , f'expect a list, got a {type(body)}'
+    validate(instance = body, schema = BOOK_ID_SCHEMAS)
+    assert len(body) == 0, f'expect a empty list, got {len(body)} data'
 
 
 def test_get_by_check_date(base_url,api_session):
@@ -36,7 +41,7 @@ def test_get_by_check_date(base_url,api_session):
     )
     body = response.json()
     assert response.status_code == 200
-    assert isinstance(body, list)
+    assert isinstance(body, list), f'expect a list, got a {type(body)}'
 
 
 def test_get_by_booking_id(base_url,create_book,api_session):
@@ -46,12 +51,12 @@ def test_get_by_booking_id(base_url,create_book,api_session):
         f'{base_url}/booking/{book_id}')
     body = response.json()
     assert response.status_code == 200
-    assert isinstance(body, dict)
-    assert 'firstname' in body
-    assert 'bookingdates' in body
-
-    assert isinstance(body['totalprice'], (int, float))
-    assert isinstance(body['depositpaid'], bool)
+    #assert isinstance(body, dict), f'expect a dictionary, got a {type(body)}'
+    validate(instance = body, schema = BOOKING_SCHEMA)
+    # assert 'firstname' in body
+    # assert 'bookingdates' in body
+    # assert isinstance(body['totalprice'], (int, float))
+    # assert isinstance(body['depositpaid'], bool)
 
 
 def test_get_by_booking_nonexistence_id(base_url,api_session):
@@ -64,8 +69,8 @@ def test_get_by_booking_nonexistence_id(base_url,api_session):
 def test_create_book(base_url,api_session,create_book):
     body = create_book
     booking_id = body['bookingid']
-    assert isinstance(body, dict)
-
+    #assert isinstance(body, dict), f'expect a dictionary, got a {type(body)}'
+    validate(instance = body["booking"], schema = BOOKING_SCHEMA)
     create_response = api_session.get(
         f'{base_url}/booking/{booking_id}'
     )
@@ -135,7 +140,7 @@ def test_delete_book(base_url, api_session):
     )
     assert response.status_code == 201
 
-    #query after deleting
+    #query after deleting to confirm deleted
     query_response = api_session.get(
         f'{base_url}/booking/{booking_id}'
     )

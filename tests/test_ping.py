@@ -1,4 +1,3 @@
-import requests
 
 def test_ping_check(base_url,api_session):
     response = api_session.get(
